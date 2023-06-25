@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "node": "^20.2.0",
+    "three": "^0.153.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.9.2",
+    "vite": "^4.3.9"
+  }
+}
