@@ -33,14 +33,22 @@ export default class Sketch {
     }
 
     addObject(){
-        this.geometry = new THREE.PlaneBufferGeometry( 0.5, 0.5, 50,50 );
+        this.geometry = new THREE.PlaneBufferGeometry( 4, 4, 150,150 );
         this.material = new THREE.MeshNormalMaterial();
+        
 
         this.material = new THREE.ShaderMaterial({
+            uniforms: {
+                time: {value:0}
+            },
             side: THREE.DoubleSide,
             fragmentShader: `
+            varying float vNoise;
                 void main() { 
-                    gl_FragColor = vec4(1.,0.,1.,1.);
+                    vec3 color1 = vec3(1.,0.,0.); 
+                    vec3 color2 = vec3(0.,0.,1.);
+                    vec3 finalColor = mix(color1, color2, 0.5*(vNoise +1.)); 
+                    gl_FragColor = vec4(finalColor,1.);
                 }
             `,
 
@@ -117,15 +125,21 @@ float cnoise(vec3 P){
   float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
   return 2.2 * n_xyz;
 }
-                void main() { 
-                    vec3 newposition = position;
-                    float PI = 3.1415925;
-                    newposition.z += 0.1*sin( (newposition.x + 0.25)*2.*PI);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4
-            ( newposition, 1.0 );
+
+uniform float time;
+varying float vNoise;
+
+void main() { 
+    vec3 newposition = position;
+    float PI = 3.1415925;
+    float noise = cnoise(vec3(position.x*4.,position.y*4. + time/5.,0.));
+    newposition.z += 0.1*noise; 
+    vNoise = noise;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4
+    ( newposition, 1.0 );
                 }
             `,
-            wireframe: true
+            
         })
 
         this.cube = new THREE.Mesh( this.geometry, this.material );
@@ -136,6 +150,7 @@ float cnoise(vec3 P){
         this.time+=0.05;
         this.cube.rotation.x = this.time/ 2000;
 	    this.cube.rotation.y = this.time /1000;
+        this.material.uniforms.time.value = this.time;
 
 	    this.renderer.render( this.scene, this.camera ); 
         window.requestAnimationFrame(this.render.bind(this));        
@@ -146,7 +161,7 @@ new Sketch({
 dom: document.getElementById('container')
 });
 
-
+// newposition.z += 0.1*sin( (newposition.x + 0.25 + time/10.)*2.*PI);
 
 
 
