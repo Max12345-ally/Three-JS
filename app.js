@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
+import ocean from './images/ocean.jpg';
 
 
 export default class Sketch {
@@ -39,16 +39,26 @@ export default class Sketch {
 
         this.material = new THREE.ShaderMaterial({
             uniforms: {
-                time: {value:0}
+                time: {value:0},
+                oceanTexture: {value: new THREE.TextureLoader().load(ocean)},
             },
             side: THREE.DoubleSide,
             fragmentShader: `
+
             varying float vNoise;
+            varying vec2 vUv;
+            uniform sampler2D oceanTexture;
+
                 void main() { 
                     vec3 color1 = vec3(1.,0.,0.); 
                     vec3 color2 = vec3(0.,0.,1.);
-                    vec3 finalColor = mix(color1, color2, 0.5*(vNoise +1.)); 
+                    vec3 finalColor = mix(color1, color2, 0.5*(vNoise +1.));
+
+                    vec4 oceanView = texture2D(oceanTexture,vUv);
+
                     gl_FragColor = vec4(finalColor,1.);
+                    gl_FragColor = vec4(vUv,0.,1.);
+                    gl_FragColor = oceanView;
                 }
             `,
 
@@ -128,18 +138,20 @@ float cnoise(vec3 P){
 
 uniform float time;
 varying float vNoise;
+varying vec2 vUv;
 
 void main() { 
     vec3 newposition = position;
     float PI = 3.1415925;
     float noise = cnoise(vec3(position.x*4.,position.y*4. + time/5.,0.));
-    newposition.z += 0.1*noise; 
+    
+
     vNoise = noise;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4
-    ( newposition, 1.0 );
-                }
-            `,
-            
+    vUv = uv;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4 ( newposition, 1.0 );
+            }
+        `,
         })
 
         this.cube = new THREE.Mesh( this.geometry, this.material );
@@ -162,6 +174,6 @@ dom: document.getElementById('container')
 });
 
 // newposition.z += 0.1*sin( (newposition.x + 0.25 + time/10.)*2.*PI);
-
+// newposition.z += 0.1*noise; 
 
 
