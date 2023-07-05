@@ -33,7 +33,8 @@ export default class Sketch {
     }
 
     addObject(){
-        this.geometry = new THREE.PlaneBufferGeometry( 1, 1, 150,150 );
+        this.geometry = new THREE.PlaneBufferGeometry( 1, 1, 40,40 );
+        this.geometry = new THREE.SphereBufferGeometry( 0.4,40,40 );
         this.material = new THREE.MeshNormalMaterial();
         
 
@@ -43,6 +44,7 @@ export default class Sketch {
                 oceanTexture: {value: new THREE.TextureLoader().load(ocean)},
             },
             side: THREE.DoubleSide,
+            wireframe: true,
             fragmentShader: `
 
             varying float vNoise;
@@ -56,21 +58,24 @@ export default class Sketch {
                     vec3 finalColor = mix(color1, color2, 0.5*(vNoise +1.));
 
                     vec2 newUV = vUv;
+
                     newUV = vec2(newUV.x, newUV.y + 0.01*sin(newUV.x*10. + time));
 
                     vec4 oceanView = texture2D(oceanTexture,newUV);
-
-                    gl_FragColor = vec4(finalColor,1.);
+                    
                     gl_FragColor = vec4(vUv,0.,1.);
-                    gl_FragColor = oceanView;
+                    
+                    
+                    
+                    
                 }
             `,
 
             vertexShader: `
             
             vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
-vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
-vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
+            vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+            vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
 
 float cnoise(vec3 P){
   vec3 Pi0 = floor(P); // Integer part for indexing
@@ -147,13 +152,16 @@ varying vec2 vUv;
 void main() { 
     vec3 newposition = position;
     float PI = 3.1415925;
-    float noise = cnoise(vec3(position.x*4.,position.y*4. + time/5.,0.));
-    
+
+    float noise = cnoise(3.*vec3(position.x,position.y,position.z + time/30.));
+
+   
+    newposition += 0.1*normal * noise;
 
     vNoise = noise;
     vUv = uv;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4 ( newposition, 1.0 );
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( newposition, 1.0 );
             }
         `,
         })
@@ -178,6 +186,12 @@ dom: document.getElementById('container')
 });
 
 // newposition.z += 0.1*sin( (newposition.x + 0.25 + time/10.)*2.*PI);
-// newposition.z += 0.1*noise; 
+ 
 
+ // gl_FragColor = vec4(finalColor,1.);
+                    
+// gl_FragColor = oceanView + 0.5*vec4(vNoise);
 
+// float dist = distance(position, vec2(0.5));
+
+// newposition.z += 0.05*sin(dist*40.);
