@@ -34,7 +34,7 @@ export default class Sketch {
 
     addObject(){
         this.geometry = new THREE.PlaneBufferGeometry( 1, 1, 40,40 );
-        this.geometry = new THREE.SphereBufferGeometry( 0.4,40,40 );
+        // this.geometry = new THREE.SphereBufferGeometry( 0.4,40,40 );
         this.material = new THREE.MeshNormalMaterial();
         
 
