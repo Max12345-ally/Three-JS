@@ -12,9 +12,12 @@ export default class Sketch {
         this.width = this.container.offsetWidth;
         this.height = this.container.offsetHeight;
 
-        this.camera = new THREE.PerspectiveCamera( 75, this.width / 
-        this.height, 0.1, 10 );
-        this.camera.position.z = 1;
+        this.camera = new THREE.PerspectiveCamera( 70, this.width / 
+        this.height, 100, 2000 );
+        this.camera.position.z = 600;
+
+        this.camera.fov = 2*Math.atan( (this.height/2)/600 )* (180/Math.PI);
+
 
         this.renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
         this.renderer.setSize( this.width, this.height );
@@ -33,7 +36,7 @@ export default class Sketch {
     }
 
     addObject(){
-        this.geometry = new THREE.PlaneBufferGeometry( 1, 1, 40,40 );
+        this.geometry = new THREE.PlaneBufferGeometry( 100,100,10,10 );
         // this.geometry = new THREE.SphereBufferGeometry( 0.4,40,40 );
         this.material = new THREE.MeshNormalMaterial();
         
@@ -156,7 +159,7 @@ void main() {
     float noise = cnoise(3.*vec3(position.x,position.y,position.z + time/30.));
 
    
-    newposition += 0.1*normal * noise;
+    
 
     vNoise = noise;
     vUv = uv;
