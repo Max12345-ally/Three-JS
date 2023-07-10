@@ -25,7 +25,9 @@ export default class Sketch {
 
         this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 
+        this.images = [...document.querySelectorAll('img')];
         
+        this.addImages();
         this.addObject();
         this.render();
     }
@@ -35,8 +37,28 @@ export default class Sketch {
         
     }
 
+    addImages(){
+        this.imageStore = this.images.map(img=>{
+            let bounds = img.getBoundingClientRect()
+            
+            let geometry = new THREE.PlaneBufferGeometry(bounds.width,bounds.height,1,1);
+            let material = new THREE.MeshBasicMaterial({color: 0xff0000});
+            let mesh = new THREE.Mesh(geometry,material);
+            this.scene.add(mesh)
+
+            return {
+                img:img,
+                mesh:mesh,
+                top: bounds.top,
+                left: bounds.left,
+                width: bounds.width,
+                height: bounds.height
+            }
+        })
+    }
+
     addObject(){
-        this.geometry = new THREE.PlaneBufferGeometry( 100,100,10,10 );
+        this.geometry = new THREE.PlaneBufferGeometry( 200,400,10,10 );
         // this.geometry = new THREE.SphereBufferGeometry( 0.4,40,40 );
         this.material = new THREE.MeshNormalMaterial();
         
@@ -66,11 +88,7 @@ export default class Sketch {
 
                     vec4 oceanView = texture2D(oceanTexture,newUV);
                     
-                    gl_FragColor = vec4(vUv,0.,1.);
-                    
-                    
-                    
-                    
+                    gl_FragColor = vec4(vUv,0.,1.); 
                 }
             `,
 
